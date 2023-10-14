@@ -1,0 +1,63 @@
+%% Set path
+filePath = mfilename('fullpath');
+[sourceDir, scriptFname, ~] = fileparts(filePath);
+[~, projName, ~] = fileparts(sourceDir);
+
+dataDir = '~/MATLAB/0604-runwalk-3';
+resultDir = pwd;
+
+dcrPath = '~/MATLAB/0617-dark-cont-65us/dcr.mat';
+
+%% Quanta Parameters
+param = struct(...
+    ...% These parameters determine which frames are used in align and merge
+    'alignTWSize', 100, 'alignTWNum', 20,...
+    'mergeTWSize', 100, 'mergeTWNum', 20, 'warpTWSize', 10,...
+    'srTWSize', 40, 'srTWNum', 50,...
+    'refFrame', calcRefFrame(100, 20),...
+    ...% Parameters for align and merging, don't change for now
+    'numLevels', 3, 'patchSizes', [16 16 8],...
+    'upsampleRatios', [1 2 4], 'searchRadii', [1 4 8], 'numLKIters', 3,...
+    'imgScale', 1, 'imgAutoScale', true,...
+    'wienerC', 8,...
+    'flowLambda', 0.01,...
+    ...% Parameters for super-resolution, don't change for now
+    'srScale', 2, 'combineRadius', 1,...
+    'k_detail', 0.3, 'k_denoise', 1, 'D_th', 0.005, 'D_tr', 0.5, 'k_stretch', 1, 'k_shrink', 1,...
+    'wienerSRC', 8,...
+    ...% Parameters for post-denoising
+    'bm3dSigma', 0,...
+    ...% Parameters for correcting hot pixels, not used for simulation
+    'hpThresh', 50, 'correctDCR', false, 'removeHP', true,...
+    'dcrPath', dcrPath,...
+    ...% Configuration, keep doRefine and deRefineSR false for now
+    'fastMode', true, 'dataType', 'double',...
+    'doRefine', false, 'doSR', false, 'doRefineSR', false,...
+    'computePSNR', false,...
+    'debug', false, 'saveImages', true, 'resultDir', resultDir);
+
+%% Read images
+tic;
+filename = 'filename';
+numRows = 256;
+numCols = 512;
+
+numFramesPerFile = 512;
+numFiles = 4;
+numFramesTotal = numFramesPerFile * numFiles;
+startFile = 70;
+
+imbs = cell(1, numFramesTotal);
+for i = 0:numFiles-1
+    frames_subarray=read_binary(dataDir,filename,i+startFile,numRows, numCols);
+    for j = 1:numFramesPerFile
+        imbs{i*numFramesPerFile+j} = logical(squeeze(frames_subarray(j, :, :)));
+    end
+end
+
+load(param.dcrPath, 'dcr');
+toc;
+fprintf('Finished reading images.\n');
+
+%% Run pipeline
+result = qbpPipelineMono(imbs, param, dcr);
