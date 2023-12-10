@@ -9,7 +9,7 @@ This is the official MATLAB implementation of of the paper "Quanta Burst Photogr
 
 ## Quick Start
 1. Run initQBP.m to set up MATLAB paths.
-2. Download the test data from https://drive.google.com/drive/folders/1SfCtAbMyUWFPkcTjift2LiU8jWqsIeLe?usp=sharing
+2. Download the test data from [[Google Drive](https://drive.google.com/drive/folders/1SfCtAbMyUWFPkcTjift2LiU8jWqsIeLe?usp=sharing)] [[Dropbox](https://www.dropbox.com/scl/fo/xwp4uu30v5ub2dai6wz1m/h?rlkey=6vh2e3l8zun77k9iawiuwvycp&dl=0)]
 2. See ./scripts for how to perform image reconstruction on the test sequences.
 
 ## Reference
